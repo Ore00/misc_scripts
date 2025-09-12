@@ -16,16 +16,18 @@ while IFS= read -r service; do
   networksetup -setv6automatic "$service" 2>/dev/null
 done <<< "$services"
 
-# Restore pf.conf
+# PF firewall restore
 PF_CONF="/etc/pf.conf"
 PF_BACKUP="/etc/pf.conf.backup.lockdown"
 
 if [ -f "$PF_BACKUP" ]; then
+  echo "[i] Restoring original PF rules..."
   sudo cp "$PF_BACKUP" "$PF_CONF"
   sudo pfctl -f "$PF_CONF"
+  sudo pfctl -d 2>/dev/null   # disable PF (optional, keeps system defaults)
+else
+  echo "[!] No backup PF rules found, just disabling PF..."
+  sudo pfctl -d 2>/dev/null
 fi
-
-# Disable PF if you don’t want it active all the time
-sudo pfctl -d 2>/dev/null
 
 echo "[✓] Online state restored."

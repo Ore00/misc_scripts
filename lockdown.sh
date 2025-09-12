@@ -34,6 +34,21 @@ fi
 {
   echo "block all"
   echo "set skip on lo0"
+
+  # Safe defaults for normal browsing
+  echo "pass out proto { udp, tcp } from any to any port 53 keep state"   # DNS
+  echo "pass out proto tcp from any to any port 80 keep state"            # HTTP
+  echo "pass out proto tcp from any to any port 443 keep state"           # HTTPS
+
+  # Email delivery + retrieval
+  echo "pass out proto tcp from any to any port 25 keep state"            # SMTP
+  echo "pass out proto tcp from any to any port 465 keep state"           # SMTPS
+  echo "pass out proto tcp from any to any port 587 keep state"           # SMTP (submission)
+  echo "pass out proto tcp from any to any port 110 keep state"           # POP3
+  echo "pass out proto tcp from any to any port 995 keep state"           # POP3S
+  echo "pass out proto tcp from any to any port 143 keep state"           # IMAP
+  echo "pass out proto tcp from any to any port 993 keep state"           # IMAPS
+
   # Loop over allowed ports
   for port in "${ALLOWED_PORTS[@]}"; do
     echo "pass out proto tcp from any to any port $port keep state"
