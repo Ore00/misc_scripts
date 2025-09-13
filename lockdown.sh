@@ -35,6 +35,10 @@ fi
   echo "block all"
   echo "set skip on lo0"
 
+  # Allow Expo/Docker dev tools on localhost ports 19000–19010
+  pass in proto tcp from any to any port 19000:19010 keep state
+  pass out proto tcp from any to any port 19000:19010 keep state
+
   # Safe defaults for normal browsing
   echo "pass out proto { udp, tcp } from any to any port 53 keep state"   # DNS
   echo "pass out proto tcp from any to any port 80 keep state"            # HTTP
