@@ -26,7 +26,7 @@ set -e
 echo "[+] Applying lockdown…"
 
 # --- Toggle: also turn off IPv6 at the network service level (safer but optional) ---
-DISABLE_V6_SERVICES=false   # set to 'false' if you want to keep macOS IPv6 settings unchanged
+DISABLE_V6_SERVICES=true    # set to 'false' if you want to keep macOS IPv6 settings unchanged
 
 # --- Parse arguments ---
 ALLOWED_IN_TCP=()
@@ -87,10 +87,7 @@ echo "[i] Writing lockdown PF rules to $PF_CONF"
   echo "block in all"
 
   # Outbound default-deny for IPv6 (we'll allow per-port below)
-  # echo "block out inet6 all"
-  # Allow only essential IPv6 control traffic; block all IPv6 TCP/UDP
-  echo "pass out inet6 proto icmp6 all keep state"
-  echo "block out quick inet6 proto { tcp, udp } from any to any"
+  echo "block out inet6 all"
 
   # -------- Local dev (Expo/Docker) on loopback only --------
   echo "pass in  on lo0 proto tcp from any to any port 19000:19010 keep state"
@@ -98,15 +95,7 @@ echo "[i] Writing lockdown PF rules to $PF_CONF"
 
   # -------- Core networking (so Wi-Fi works) --------
   # DHCP client (stateful will allow server replies)
-  # echo "pass out proto udp from any port 68 to any port 67 keep state"
-  # DHCP (IPv4): allow client <-> server both directions
   echo "pass out proto udp from any port 68 to any port 67 keep state"
-  echo "pass in  proto udp from any port 67 to any port 68 keep state"
-
-  # DHCPv6 & Router Advertisements
-  echo "pass out inet6 proto udp from any port 546 to any port 547 keep state"
-  echo "pass in  inet6 proto udp from any port 547 to any port 546 keep state"
-
   # DNS (UDP/TCP)
   echo "pass out proto { udp, tcp } from any to any port 53 keep state"
   # ICMP/ICMPv6 (neighbor discovery, PMTU, ping)
